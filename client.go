@@ -3,6 +3,7 @@ package gosocketio
 import (
 	"github.com/graarh/golang-socketio/transport"
 	"strconv"
+	"fmt"
 )
 
 const (
@@ -40,7 +41,7 @@ ws://myserver.com/socket.io/?EIO=3&transport=websocket
 
 You can use GetUrlByHost for generating correct url
 */
-func Dial(url string, tr transport.Transport) (*Client, error) {
+func Dial(url string, nsp string, tr transport.Transport) (*Client, error) {
 	c := &Client{}
 	c.initChannel()
 	c.initMethods()
@@ -50,6 +51,9 @@ func Dial(url string, tr transport.Transport) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	// nsp
+	nspMsg := fmt.Sprintf("4%d%s", protocol.MessageTypeOpen, nsp)
+    c.conn.WriteMessage(nspMsg)
 
 	go inLoop(&c.Channel, &c.methods)
 	go outLoop(&c.Channel, &c.methods)
